@@ -36,9 +36,9 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		if prAssignee == "" {
-			log.Fatal("--assignee is required")
-		}
+		// if prAssignee == "" {
+		// 	log.Fatal("--assignee is required")
+		// }
 
 		prBodyFile, err := cmd.Flags().GetString("body-file")
 		if err != nil {
