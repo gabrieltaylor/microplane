@@ -137,10 +137,11 @@ func githubSearch(query string) ([]Repo, error) {
 
 	client := github.NewClient(tc)
 
-	opts := &github.SearchOptions{}
+	opts := &github.SearchOptions{ListOptions: github.ListOptions{PerPage: 100}}
 	allRepos := map[string]*github.Repository{}
 	numProcessedResults := 0
 	for {
+<<<<<<< HEAD
 		result, resp, err := client.Search.Code(context.Background(), query, opts)
 		if abuseErr, ok := err.(*github.AbuseRateLimitError); ok {
 			var waitTime time.Duration
@@ -154,12 +155,19 @@ func githubSearch(query string) ([]Repo, error) {
 			continue
 		} else if err != nil {
 			return []Repo{}, err
+=======
+		result, resp, err := client.Search.Repositories(context.Background(), query, opts)
+		if err != nil {
+			log.Printf("Search.Code returned error: %v", err)
+>>>>>>> Use repository search instead of code search
 		}
 
-		for _, codeResult := range result.CodeResults {
+		for _, repository := range result.Repositories {
+			log.Printf("Repo name: %s", *repository.Name)
 			numProcessedResults = numProcessedResults + 1
-			repoCopy := *codeResult.Repository
-			allRepos[*codeResult.Repository.Name] = &repoCopy
+			repoCopy := repository
+			log.Printf("Repo: %s", repository)
+			allRepos[*repository.Name] = &repoCopy
 		}
 
 		incompleteResults := result.GetIncompleteResults()
@@ -170,7 +178,7 @@ func githubSearch(query string) ([]Repo, error) {
 		if resp.NextPage == 0 {
 			break
 		}
-		opts.Page = resp.NextPage
+		opts.ListOptions.Page = resp.NextPage
 	}
 	return getFormattedRepos(allRepos), nil
 }
